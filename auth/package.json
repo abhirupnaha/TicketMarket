@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "devStart": "nodemon index.ts"
+    "devStart": "nodemon src/index.ts"
   },
   "keywords": [],
   "author": "",

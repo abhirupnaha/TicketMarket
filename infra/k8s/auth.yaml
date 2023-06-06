@@ -1,3 +1,4 @@
+# deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,3 +17,18 @@ spec:
   selector:
     matchLabels:
       app: auth
+---
+# clusterIP service
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-srv
+spec:
+  type: ClusterIP
+  ports:
+    - name: auth-port
+      protocol: TCP
+      targetPort: 3000
+      port: 3000
+  selector:
+    app: auth
