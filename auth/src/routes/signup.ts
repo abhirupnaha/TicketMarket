@@ -1,6 +1,9 @@
 import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 
+import { RequestValidationError } from '../errors/request-validation-errors';
+import { DatabaseConnectionError } from '../errors/database-connection-error';
+
 const route = express.Router();
 
 /* route: ticketmarket.dev/api/users/signup
@@ -24,14 +27,14 @@ route.post(
         const errors = validationResult(req);
 
         if(!errors.isEmpty()) {
-            throw new Error('Invalid email or password');
+            throw new RequestValidationError(errors.array());
         }
 
         const { email, password } = req.body;
 
         console.log(`creating user ${email} ...`);
         
-        throw new Error('error connecting to db');
+        throw new DatabaseConnectionError(errors.array());
 
         res.status(201).json({ message: `${email} user was created`});
     }
