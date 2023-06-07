@@ -1,10 +1,11 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 
 import { signinRoute } from './routes/signin';
 import { signoutRoute } from './routes/signout';
 import { signupRoute } from './routes/signup';
 import { currentUserRoute } from './routes/current-user';
 import { errorHandler } from './middleware/error-handler';
+import { NotFound } from './errors/not-found-error';
 
 const app = express();
 
@@ -17,6 +18,11 @@ app.use(currentUserRoute);
 
 app.get('/api/users/healthcheck', (req: Request, res: Response) => {
     res.sendStatus(200);
+});
+
+// testing error handling with async function
+app.all('*', async (req: Request, res: Response, next: NextFunction) => {
+    next(new NotFound());
 });
 
 app.use(errorHandler);
