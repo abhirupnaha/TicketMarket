@@ -2,33 +2,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-depl
+  name: auth-mongo-depl
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: auth
+        app: auth-mongo
     spec:
       containers:
-        - name: auth
-          image: abhirupnaha/auth:latest
-          imagePullPolicy: Never
+        - name: auth-mongo
+          image: mongo
   selector:
     matchLabels:
-      app: auth
+      app: auth-mongo
 ---
 # clusterIP service
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-srv
+  name: auth-mongo-srv
 spec:
   type: ClusterIP
-  ports:
-    - name: auth-srv-port
-      protocol: TCP
-      targetPort: 3000
-      port: 3000
   selector:
-    app: auth
+    app: auth-mongo
+  ports:
+    - name: auth-mongo-srv-port
+      protocol: TCP
+      targetPort: 27017
+      port: 27017
+
