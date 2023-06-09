@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
+import mongoose from 'mongoose';
 
 import { signinRoute } from './routes/signin';
 import { signoutRoute } from './routes/signout';
@@ -27,6 +28,17 @@ app.all('*', async (req: Request, res: Response, next: NextFunction) => {
 
 app.use(errorHandler);
 
-app.listen(3000, () => {
-    console.log('auth server running at port 3000!');
-});
+const start = async () => {
+    try {
+        await mongoose.connect('mongodb://auth-mongo-srv:27017/auth');
+        console.log('connected to mongodb');
+    } catch (err) {
+        console.error(err);
+    }
+
+    app.listen(3000, () => {
+        console.log('auth server running at port 3000!!!');
+    });
+}
+
+start();

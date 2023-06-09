@@ -1,8 +1,9 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 
 import { RequestValidationError } from '../errors/request-validation-errors';
-import { DatabaseConnectionError } from '../errors/database-connection-error';
+import { User } from '../models/user';
+import { BadRequestError } from '../errors/bad-request-error';
 
 const route = express.Router();
 
@@ -22,21 +23,30 @@ route.post(
             .isLength({ min: 4, max: 25 })
             .withMessage('password must be between 4 to 20 characters')
     ],
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         console.log('request came to ticketmarket.dev/api/users/signup');
         const errors = validationResult(req);
 
         if(!errors.isEmpty()) {
-            throw new RequestValidationError(errors.array());
+            return next(new RequestValidationError(errors.array()));
         }
 
         const { email, password } = req.body;
 
-        console.log(`creating user ${email} ...`);
-        
-        throw new DatabaseConnectionError(errors.array());
+        const existingUser = await User.findOne({ email });
 
-        res.status(201).json({ message: `${email} user was created`});
+        if (existingUser) {
+            console.log('Email in use');
+            return next(new BadRequestError('Email in use'));
+        }
+
+        console.log('creating user ...');
+        const newUser = User.build({ email, password });
+        await newUser.save();
+
+        console.log('following user was created\n', newUser)
+
+        res.status(201).json(newUser);
     }
 );
 

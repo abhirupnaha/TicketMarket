@@ -9,7 +9,7 @@ export const errorHandler = (
     next: NextFunction
 ) => {
     if (err instanceof customError) {
-        console.log('RequestValidationError error occured');
+        console.log(err.name, 'error occured');
         return res.status(err.statusCode).json({ errors: err.serializeErrors() });
     } else {
         console.log('unknown error occured');
