@@ -14,6 +14,12 @@ spec:
         - name: auth
           image: abhirupnaha/auth:latest
           imagePullPolicy: Never
+          env:
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
   selector:
     matchLabels:
       app: auth

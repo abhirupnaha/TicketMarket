@@ -1,9 +1,10 @@
 import express, { NextFunction, Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
+import jwt from 'jsonwebtoken';
 
-import { RequestValidationError } from '../errors/request-validation-errors';
 import { User } from '../models/user';
 import { BadRequestError } from '../errors/bad-request-error';
+import { validateRequest } from '../middleware/validate-request';
 
 const route = express.Router();
 
@@ -16,20 +17,16 @@ route.post(
     '/api/users/signup',
     [
         body('email')
-            .notEmpty()
+            .isEmail()
             .withMessage('email is invalid'),
         body('password')
             .trim()
             .isLength({ min: 4, max: 25 })
             .withMessage('password must be between 4 to 20 characters')
     ],
+    validateRequest,
     async (req: Request, res: Response, next: NextFunction) => {
         console.log('request came to ticketmarket.dev/api/users/signup');
-        const errors = validationResult(req);
-
-        if(!errors.isEmpty()) {
-            return next(new RequestValidationError(errors.array()));
-        }
 
         const { email, password } = req.body;
 
@@ -44,7 +41,17 @@ route.post(
         const newUser = User.build({ email, password });
         await newUser.save();
 
-        console.log('following user was created\n', newUser)
+        console.log(`New user ${newUser._id} was created`);
+
+        const userJwt = jwt.sign(
+            {
+                user: newUser.id,
+                email: newUser.email
+            },
+            process.env.JWT_SECRET! // ! --> tells typescript not to check for null and undefined
+        );
+
+        req.session = { jwt: userJwt };
 
         res.status(201).json(newUser);
     }
